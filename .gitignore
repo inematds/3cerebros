@@ -1,0 +1,16 @@
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# cérebro/dados locais
+*.db
+.cerebros/
+
+# OS / editor
+.DS_Store
+*~
