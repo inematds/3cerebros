@@ -33,9 +33,18 @@ _RULE_RE = re.compile(r"^\s*([a-z0-9_]+)\s*[:=]\s*(allow|confirm|deny)\s*$", re.
 class Policy:
     def __init__(self, policy_path: str | Path | None = None, default: str = "confirm"):
         self.default = default if default in LEVELS else "confirm"
+        self.path = Path(policy_path) if policy_path else None
         self.rules = dict(DEFAULT_RULES)
-        if policy_path and Path(policy_path).exists():
-            self._load(Path(policy_path))
+        if self.path and self.path.exists():
+            self._load(self.path)
+
+    def reload(self, policy_path: str | Path | None = None) -> None:
+        """Recarrega as regras do POLICY.md (após a entrevista reescrever o arquivo)."""
+        if policy_path:
+            self.path = Path(policy_path)
+        self.rules = dict(DEFAULT_RULES)
+        if self.path and self.path.exists():
+            self._load(self.path)
 
     def _load(self, path: Path) -> None:
         for line in path.read_text(encoding="utf-8").splitlines():

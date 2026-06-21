@@ -44,6 +44,7 @@ CREATE VIRTUAL TABLE memories USING fts5(
 
 ## Como um host consome
 - **Python:** `from cerebros import Brain; Brain("~/.cerebros")`.
-- **Outro runtime:** MCP server (F4) sobre o `Brain`.
-- **Claude Code/Codex:** Agent Skills (F4) que operam esta pasta.
+- **CLI:** `cerebros <cmd> --brain <brain>` (init/observe/recall/ingest/jobs/policy).
+- **Outro runtime:** MCP server (`cerebros mcp`) sobre o `Brain`.
+- **Claude Code/Codex:** Agent Skills em `skills/` que operam esta pasta.
 - **Só o formato:** apontar qualquer ferramenta pra `<brain>/`.

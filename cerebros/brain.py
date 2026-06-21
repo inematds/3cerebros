@@ -90,14 +90,37 @@ class Brain:
             n += 1
         return n
 
+    def interview(self, answers: dict | None = None, ask=None) -> dict:
+        """Entrevista de onboarding (F1): gera SOUL/values/POLICY a partir das respostas.
+
+        `answers=None` → entrevista interativa (terminal). `answers={...}` → host/CLI.
+        """
+        from .interview import Interview
+
+        return Interview().run(self, answers=answers, ask=ask)
+
+    def act(self, action: str, do, *, on_confirm=None) -> dict:
+        """Executa uma ação SOB a política (o gate real do diferencial).
+
+        allow → roda `do()`. confirm → roda `on_confirm()` (ou nada). deny → pula.
+        Retorna {'verdict', 'action', 'result'}.
+        """
+        verdict = self.policy.check(action)
+        if verdict == "allow":
+            return {"verdict": "allow", "action": action, "result": do()}
+        if verdict == "confirm":
+            return {"verdict": "confirm", "action": action,
+                    "result": on_confirm() if on_confirm else None}
+        return {"verdict": "deny", "action": action, "result": None}
+
     def run_jobs(self) -> dict:
-        """Manutenção autônoma (cron chama). F0: relata o que faria, sob política."""
-        plan = {
-            "triagem_inbox": self.policy.check("triagem"),
-            "briefing_diario": self.policy.check("atualizar_daily"),
-            "saude_cerebro": "allow",
-        }
-        return {"status": "F0-stub", "would_run": plan, "memorias": self.stats()}
+        """Manutenção autônoma (cron chama): triagem do inbox, briefing, saúde.
+
+        Cada job roda sob a política. Retorna o que rodou / ficou pendente / pulou.
+        """
+        from . import jobs
+
+        return jobs.run(self)
 
     def stats(self) -> dict:
         return {s: self.memory.count(s) for s in SECTORS}

@@ -86,6 +86,17 @@ class Memory:
         except sqlite3.OperationalError:
             return []
 
+    def recent(self, limit: int = 10, sector: str | None = None) -> list[dict]:
+        """Memórias mais recentes (por created_at), opcionalmente de um setor."""
+        sql = "SELECT content, sector, category, who, created_at FROM memories"
+        args: list = []
+        if sector:
+            sql += " WHERE sector = ?"
+            args.append(sector)
+        sql += " ORDER BY created_at DESC, rowid DESC LIMIT ?"
+        args.append(limit)
+        return [dict(r) for r in self.db.execute(sql, args)]
+
     def count(self, sector: str | None = None) -> int:
         if sector:
             row = self.db.execute(

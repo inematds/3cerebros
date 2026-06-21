@@ -1,7 +1,8 @@
-"""Host mínimo: como QUALQUER sistema incorpora o 3cerebros em ~30 linhas.
+"""Host mínimo: como QUALQUER sistema incorpora o 3cerebros operacional.
 
-Isto é o esqueleto do que o intelecto faz no `core.py`: monta o contexto a
-partir do cérebro, chama o seu LLM, e deixa o cérebro observar/rotear sozinho.
+É o esqueleto do que o intelecto faz no `core.py`: monta contexto a partir do
+cérebro, chama o LLM, deixa o cérebro observar/rotear sozinho, roda manutenção
+autônoma e gateia ações externas pela política.
 
     python examples/minimal_host.py
 """
@@ -16,7 +17,14 @@ def fake_llm(system: str, user: str) -> str:
 def main():
     brain = Brain("/tmp/cerebro-demo")  # use ~/.cerebros no host real
 
-    # simula uma conversa
+    # 0. onboarding (F1): gera SOUL/values/POLICY a partir de respostas
+    brain.interview(answers={
+        "name": "Demo", "tone": "direto", "mission": "organizar tudo",
+        "values": "simplicidade", "red_lines": "nunca apagar sozinho",
+        "autonomy": "equilibrado", "allow_messages": "n", "allow_shell": "n",
+    })
+
+    # 1-3. o loop de conversa
     for msg in [
         "decidi migrar o projeto pra Postgres na sexta",
         "acho que simplicidade vale mais que features",
@@ -27,9 +35,18 @@ def main():
         sector = brain.observe("demo", msg, reply)             # 3. cérebro roteia + salva sozinho
         print(f"[{sector:12}] {msg}")
 
-    print("\nstats:", brain.stats())
-    print("recall 'projeto':", [h["content"] for h in brain.recall("projeto postgres")])
-    print("policy enviar_mensagem:", brain.policy.check("enviar_mensagem"))
+    # 4. manutenção autônoma (F2) — o cron do host chamaria isto
+    jobs = brain.run_jobs()
+    print("\njobs:", list(jobs["ran"]))
+
+    # 5. ação externa SOB a política (F1) — o gate do diferencial
+    gate = brain.act("enviar_mensagem",
+                     do=lambda: "enviado!",
+                     on_confirm=lambda: "pediria confirmação ao dono")
+    print("enviar_mensagem:", gate["verdict"], "→", gate["result"])
+
+    print("stats:", brain.stats())
+    print("recall 'postgres':", [h["content"] for h in brain.recall("postgres projeto")])
     brain.close()
 
 

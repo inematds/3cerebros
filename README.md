@@ -4,7 +4,7 @@
 
 **Um cérebro de IA com 3 cérebros — isolado e embutível por qualquer agente.**
 
-Projeto · Self · Conhecimento · `.md` + SQLite · zero dependências (F0)
+Projeto · Self · Conhecimento · `.md` + SQLite · zero dependências no núcleo
 
 </div>
 
@@ -27,10 +27,12 @@ automação** (o que o cérebro pode fazer sozinho vs pedir confirmação).
 
 > A pesquisa e o racional estão em [inematds/2cerebrox](https://github.com/inematds/2cerebrox).
 
-## Status: F0 (esqueleto)
+## Status: operacional (F1–F4, menos SDK TS)
 
-A F0 entrega o **núcleo rodável**: `Brain` com memória SQLite FTS5, triagem,
-política e destilação. Conectores (F3), MCP/SDK-ts/Agent-Skills (F4) vêm depois.
+Núcleo rodável **com tudo ligado**: entrevista que gera a política (F1),
+autonomia sob política (F2), conectores de ingestão (F3), e CLI + MCP server +
+Agent Skills (F4). Único pendente: o SDK TypeScript (qualquer host TS usa o **MCP
+server** enquanto isso). Núcleo só stdlib; `mcp` é dependência **opcional**.
 
 ## Uso (Python)
 
@@ -39,24 +41,47 @@ from cerebros import Brain
 
 brain = Brain("~/.cerebros")                 # cria os 3 cérebros se não existirem
 
+brain.interview(answers={...})               # F1: entrevista → SOUL/values/POLICY
 system = brain.build_context(query, who)     # Self + memórias relevantes → system prompt
 brain.observe(who, user_msg, ai_reply)       # triagem + save autônomo (sob política)
 brain.recall("postgres", sector="projeto")   # busca por relevância (BM25)
 brain.note("texto cru")                       # destila em nota no Conhecimento
+brain.ingest("chatgpt_export", path="…")     # F3: importa fonte externa → inbox
+brain.run_jobs()                              # F2: manutenção autônoma (cron chama)
+brain.act("enviar_mensagem", do=enviar)      # gate de ação SOB a política
 brain.policy.check("enviar_mensagem")         # 'allow' | 'confirm' | 'deny'
-brain.run_jobs()                              # manutenção (cron chama)
 ```
 
-Veja [`examples/minimal_host.py`](examples/minimal_host.py) — um host completo em ~30 linhas.
+Veja [`examples/minimal_host.py`](examples/minimal_host.py) (host completo) e
+[`examples/intelecto_seam.py`](examples/intelecto_seam.py) (ponto de costura no `core.py`).
+
+## Uso (CLI)
+
+```bash
+pip install -e .                  # instala o comando `cerebros`
+cerebros init                     # entrevista de onboarding (gera a política)
+cerebros observe "decidi migrar pra Postgres na sexta" --who nei
+cerebros ingest chatgpt_export --path conversations.json
+cerebros jobs                     # roda a manutenção autônoma (sob política)
+cerebros recall "postgres" --sector projeto
+cerebros policy enviar_mensagem   # → allow | confirm | deny
+cerebros mcp                      # sobe o MCP server (pip install 'cerebros[mcp]')
+```
+
+## Agent Skills (Claude Code / Codex / Gemini)
+
+Em [`skills/`](skills): `cerebro-triagem` (capturar/rotear), `cerebro-nota`
+(destilar conhecimento) e `cerebro-socratica` (pensar apoiado no Self). Operam o
+mesmo cérebro em `~/.cerebros/` via a CLI.
 
 ## Como incorporar no seu sistema
 
 | Host | Como |
 |---|---|
 | Python (intelecto, jarvis caseiro) | `pip install -e .` ou git submodule → `from cerebros import Brain` |
-| TypeScript (ex.: openpcbot) | SDK ts (F4) ou o MCP server |
-| Claude Code / Codex / Gemini | Agent Skills (F4) + MCP |
-| Qualquer runtime | subir o MCP server (F4) |
+| Claude Code / Codex / Gemini | Agent Skills de [`skills/`](skills) + MCP |
+| Qualquer runtime | subir o MCP server (`cerebros mcp`) |
+| TypeScript (ex.: openpcbot) | falar com o **MCP server** (SDK ts ainda não — único pendente) |
 | Só o formato | apontar a ferramenta pra `~/.cerebros/` — spec aberta |
 
 ## Formato e política
@@ -73,10 +98,11 @@ python -m pytest -q          # ou: python tests/test_smoke.py
 ## Roadmap
 
 - **F0 ✅** núcleo: Brain, memória FTS5, triagem, política, destilação
-- **F1** entrevista → `POLICY.md` do usuário (o diferencial)
-- **F2** autonomia: `run_jobs()` real (triagem/briefing/saúde) via cron
-- **F3** conectores: ChatGPT export, Telegram, email → inbox
-- **F4** empacotar: MCP server + SDK ts + Agent Skills
+- **F1 ✅** entrevista → `POLICY.md` do usuário + `brain.act()` (o diferencial)
+- **F2 ✅** autonomia: `run_jobs()` real (triagem/briefing/saúde) via cron
+- **F3 ✅** conectores: ChatGPT export, Telegram, email/mbox, arquivos → inbox
+- **F4 ✅** empacotar: CLI `cerebros` + MCP server + Agent Skills
+- **F4 (resta)** SDK TypeScript — hosts TS usam o MCP server enquanto isso
 
 ---
 

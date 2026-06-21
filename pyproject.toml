@@ -4,17 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cerebros"
-version = "0.1.0"
+version = "0.2.0"
 description = "Um cérebro de IA com 3 cérebros (Projeto/Self/Conhecimento) — isolado e embutível por qualquer agente."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "INEMA" }]
-keywords = ["second-brain", "memory", "agent", "pkm", "sqlite", "fts5"]
-dependencies = []  # F0: só stdlib (sqlite3). Conectores/LLM são plugados pelo host.
+keywords = ["second-brain", "memory", "agent", "pkm", "sqlite", "fts5", "mcp"]
+dependencies = []  # núcleo: só stdlib (sqlite3). Conectores/LLM são plugados pelo host.
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0"]            # só pra subir o MCP server (cerebros mcp)
+
+[project.scripts]
+cerebros = "cerebros.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/inematds/3cerebros"
 
 [tool.setuptools]
-packages = ["cerebros", "cerebros.ingest"]
+packages = ["cerebros", "cerebros.ingest", "cerebros.mcp"]

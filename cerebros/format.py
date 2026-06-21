@@ -26,6 +26,13 @@ DIRS = [
 # Setores válidos (1 por cérebro) — usados na memória e na triagem.
 SECTORS = ("projeto", "self", "conhecimento")
 
+# Onde a triagem (F2) arquiva o .md de cada setor, ao esvaziar a inbox.
+SECTOR_DIR = {
+    "projeto": "1-projeto/projects",
+    "self": "2-self/journal",
+    "conhecimento": "3-conhecimento/notes",
+}
+
 SEED_SOUL = """# SOUL — Quem eu sou (cérebro Self)
 
 > A personalidade do agente. Se este cérebro alimenta um jarvis, este arquivo

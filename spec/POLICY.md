@@ -43,5 +43,7 @@ else: skip()
 
 ## Origem
 A política deriva dos **valores** do dono (cérebro Self). A entrevista de
-onboarding (F1) gera o `POLICY.md` inicial a partir dessas respostas.
-Ação desconhecida → cai no `default` (conservador: `confirm`).
+onboarding gera o `POLICY.md` inicial a partir dessas respostas — rode
+`cerebros init` (ou `brain.interview(answers=…)`). Ação desconhecida → cai no
+`default` (conservador: `confirm`). O host aplica a política antes de agir com
+`brain.act(action, do=…)` ou `brain.policy.check(action)`.
